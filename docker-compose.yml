@@ -28,7 +28,9 @@ services:
       - geoserver_network
 
   postgres:
-    image: postgis/postgis:15-3.4
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
     container_name: geoserver_postgres
     ports:
       - "5432:5432"
@@ -38,7 +40,6 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     restart: unless-stopped
     networks:
       - geoserver_network
