@@ -74,8 +74,20 @@ WSGI_APPLICATION = 'geograph.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'geograph_data',
+        'USER': 'geograph',
+        'PASSWORD': 'geograph',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'datastore': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'geograph_layer',
+        'USER': 'geograph',
+        'PASSWORD': 'geograph',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -120,3 +132,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
