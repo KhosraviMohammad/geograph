@@ -9,6 +9,7 @@ import zipfile
 import tempfile
 from .models import ShapefileImport
 import json
+from inertia import render as inertia_render
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -120,3 +121,13 @@ def list_imports(request):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+def test_inertia(request):
+    """Test view for Inertia.js"""
+    return inertia_render(request, 'TestPage', {
+        'message': 'سلام! این یک تست Inertia.js است',
+        'data': {
+            'name': 'Geograph',
+            'version': '1.0.0'
+        }
+    })

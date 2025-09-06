@@ -1,0 +1,22 @@
+{% load static %}
+{% load django_vite %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <title>عنوان پیش‌فرض سایت</title>
+    <meta name="description" content="توضیحات سایت شما"/>
+    <meta charSet="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="توضیحات کوتاه در مورد سایت شما که در نتایج جستجو نمایش داده می‌شود."/>
+    <meta name="keywords" content="کلمات کلیدی, مرتبط, با, سایت, شما"/>
+    <meta name="author" content="نام نویسنده یا برند"/>
+    <meta http-equiv="content-language" content="fa"/>
+    <title>Title</title>
+    {% vite_hmr_client %}
+    {% vite_asset 'src/main.jsx' %}
+</head>
+<body>
+{% block inertia %}{% endblock %}
+</body>
+</html>
