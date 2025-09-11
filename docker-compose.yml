@@ -1,4 +1,19 @@
 services:
+  web:
+    image: python:3.11-slim
+    container_name: geograph_web
+    working_dir: /app
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_DEBUG=1
+    volumes:
+      - ./:/app
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
   geoserver:
     image: kartoza/geoserver:latest
     container_name: geoserver
@@ -24,8 +39,6 @@ services:
       - geoserver_logs:/opt/geoserver/logs
       - geoserver_gwc:/opt/geoserver/gwc
     restart: unless-stopped
-    networks:
-      - geoserver_network
 
   postgres:
     build:
@@ -41,8 +54,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
-    networks:
-      - geoserver_network
 
 volumes:
   geoserver_data:
@@ -50,6 +61,3 @@ volumes:
   geoserver_gwc:
   postgres_data:
 
-networks:
-  geoserver_network:
-    driver: bridge

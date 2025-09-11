@@ -37,8 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_vite',
-    'inertia',
 
     'modules.GeoImporter',
 ]
@@ -138,17 +136,4 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Django Vite settings
-DJANGO_VITE = {
-    "default": {
-        "dev_mode": True,
-        "dev_server_protocol": "http",
-        "dev_server_host": "localhost",
-        "dev_server_port": 5173,
-    }
-}
-
-# Inertia settings
-INERTIA_LAYOUT = 'base.html'
 
