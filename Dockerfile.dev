@@ -1,0 +1,54 @@
+# Stage 1: Base image with system dependencies
+FROM python:3.13-slim as base
+
+# Install system dependencies with caching
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update && \
+    apt-get install -y \
+    gdal-bin \
+    libgdal-dev \
+    libgeos-dev \
+    libproj-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set GDAL environment variables
+ENV GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so
+ENV GEOS_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgeos_c.so
+ENV PROJ_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libproj.so
+
+# Stage 2: Python dependencies
+FROM base as python-deps
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies with caching
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Stage 3: Development image
+FROM python-deps as development
+
+# Copy project files
+COPY . .
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_DEBUG=1
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Create virtual environment
+# RUN python -m venv /app/venv
+
+# Expose port
+EXPOSE 8000
+
+# Default command for development
+CMD ["sh", "-c", "source /app/venv/bin/activate && python manage.py runserver 0.0.0.0:8000"]

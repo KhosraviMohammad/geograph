@@ -1,63 +1,28 @@
 services:
   web:
-    image: python:3.11-slim
-    container_name: geograph_web
-    working_dir: /app
-    command: sh -c "pip install --no-cache-dir -r requirements.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    ports:
-      - "8000:8000"
-    environment:
-      - DJANGO_DEBUG=1
-    volumes:
-      - ./:/app
-    depends_on:
-      - postgres
-    restart: unless-stopped
-
-  geoserver:
-    image: kartoza/geoserver:latest
-    container_name: geoserver
-    ports:
-      - "8080:8080"
-    environment:
-      - GEOSERVER_ADMIN_USER=admin
-      - GEOSERVER_ADMIN_PASSWORD=geoserver
-      - GEOSERVER_ADMIN_EMAIL=admin@example.com
-      - GEOSERVER_DATA_DIR=/opt/geoserver/data_dir
-      - GEOSERVER_LOG_LEVEL=INFO
-      - GEOWEBCACHE_CACHE_DIR=/opt/geoserver/gwc
-      - GEOSERVER_LOG_LOCATION=/opt/geoserver/logs/geoserver.log
-      - GEOSERVER_LOG_LEVEL=INFO
-      - GEOWEBCACHE_LOG_LOCATION=/opt/geoserver/logs/gwc.log
-      - GEOWEBCACHE_LOG_LEVEL=INFO
-      - GEOSERVER_LOG_LEVEL=INFO
-      - GEOWEBCACHE_LOG_LEVEL=INFO
-      - GEOSERVER_LOG_LOCATION=/opt/geoserver/logs/geoserver.log
-      - GEOWEBCACHE_LOG_LOCATION=/opt/geoserver/logs/gwc.log
-    volumes:
-      - geoserver_data:/opt/geoserver/data_dir
-      - geoserver_logs:/opt/geoserver/logs
-      - geoserver_gwc:/opt/geoserver/gwc
-    restart: unless-stopped
-
-  postgres:
     build:
       context: .
-      dockerfile: Dockerfile.postgres
-    container_name: geoserver_postgres
+      dockerfile: Dockerfile.dev
+      target: development
+      tags:
+        - geograph-web:dev-1.0.0
+        - geograph-web:latest
+    container_name: geograph_web
     ports:
-      - "5432:5432"
+      - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - POSTGRES_DB=geograph_layer
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - PYTHONUNBUFFERED=1
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+      - ./:/app
+    working_dir: /app
+    restart: "no"
+    networks:
+      - geograph_network
+    # command: sh -c "python -m venv /app/venv && . /app/venv/bin/activate && pip install -r requirements.txt && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c ". /app/venv/bin/activate && python manage.py runserver 0.0.0.0:8000"
 
-volumes:
-  geoserver_data:
-  geoserver_logs:
-  geoserver_gwc:
-  postgres_data:
-
+networks:
+  geograph_network:
+    external: false

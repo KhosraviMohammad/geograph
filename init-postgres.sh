@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 # Create additional database
@@ -11,6 +11,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     CREATE USER geograph WITH PASSWORD 'geograph' CREATEDB;
     GRANT ALL PRIVILEGES ON DATABASE geograph_layer TO geograph;
     GRANT ALL PRIVILEGES ON DATABASE geograph_data TO geograph;
+    GRANT ALL PRIVILEGES ON DATABASE geograph_layer TO postgres;
+    GRANT ALL PRIVILEGES ON DATABASE geograph_data TO postgres;
 EOSQL
 
 # Enable PostGIS on geograph_layer

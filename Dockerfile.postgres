@@ -1,4 +1,4 @@
-FROM postgres:15-alpine
+FROM postgis/postgis:15-3.4-alpine
 
 # Set environment variables
 ENV POSTGRES_DB=geograph_layer
@@ -8,5 +8,6 @@ ENV POSTGRES_PASSWORD=postgres
 # Copy initialization script
 COPY init-postgres.sh /docker-entrypoint-initdb.d/
 
-# Make script executable
-RUN chmod +x /docker-entrypoint-initdb.d/init-postgres.sh
+# Make script executable and ensure proper line endings
+RUN chmod +x /docker-entrypoint-initdb.d/init-postgres.sh && \
+    sed -i 's/\r$//' /docker-entrypoint-initdb.d/init-postgres.sh
