@@ -22,6 +22,7 @@ services:
       - geograph_network
     # command: sh -c "python -m venv /app/venv && . /app/venv/bin/activate && pip install -r requirements.txt && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     # command: sh -c ". /app/venv/bin/activate && pip install -r requirements.txt"
+    # command: sh -c ". /app/venv/bin/activate && python manage.py makemigrations && python manage.py migrate"
     command: sh -c ". /app/venv/bin/activate && python manage.py runserver 0.0.0.0:8000"
 
 networks:

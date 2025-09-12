@@ -15,6 +15,12 @@ class ShapefileImport(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, default='pending')
     
+    # GeoServer fields
+    geoserver_layer = models.CharField(max_length=255, blank=True, null=True)
+    geoserver_wms_url = models.URLField(blank=True, null=True)
+    geoserver_wfs_url = models.URLField(blank=True, null=True)
+    published_to_geoserver = models.BooleanField(default=False)
+    
     def __str__(self):
         return f"{self.name} - {self.table_name}"
     

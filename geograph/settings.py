@@ -151,3 +151,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS=True
 
+# GeoServer Configuration
+GEOSERVER_URL = os.getenv('GEOSERVER_URL', 'http://localhost:8081/geoserver')
+GEOSERVER_USERNAME = os.getenv('GEOSERVER_USERNAME', 'admin')
+GEOSERVER_PASSWORD = os.getenv('GEOSERVER_PASSWORD', 'geoserver')
+GEOSERVER_WORKSPACE = os.getenv('GEOSERVER_WORKSPACE', 'geograph')
+

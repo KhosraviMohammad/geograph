@@ -9,6 +9,10 @@ class ShapefileImportSchema(Schema):
     table_name: str
     status: str
     created_at: datetime
+    geoserver_layer: Optional[str] = None
+    geoserver_wms_url: Optional[str] = None
+    geoserver_wfs_url: Optional[str] = None
+    published_to_geoserver: bool = False
 
 
 class ShapefileImportCreateSchema(Schema):
