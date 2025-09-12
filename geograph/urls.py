@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('geo/', include('modules.GeoImporter.urls')),
+    path('', include('modules.GeoImporter.urls')),
 ]
 
 # Serve media files in development
