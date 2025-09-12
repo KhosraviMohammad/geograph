@@ -11,9 +11,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,7 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
 
+    'ninja',
     'modules.GeoImporter',
 ]
 
@@ -49,7 +56,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'inertia.middleware.InertiaMiddleware',
 ]
 
 ROOT_URLCONF = 'geograph.urls'
@@ -78,19 +84,19 @@ WSGI_APPLICATION = 'geograph.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'geograph_data',
-        'USER': 'geograph',
-        'PASSWORD': 'geograph',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('POSTGRES_DB', 'geograph_data'),
+        'USER': os.getenv('POSTGRES_USER', 'geograph'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'geograph'),
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
     },
     'datastore': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'geograph_layer',
-        'USER': 'geograph',
-        'PASSWORD': 'geograph',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('POSTGRES_DB_DATASTORE', 'geograph_layer'),
+        'USER': os.getenv('POSTGRES_USER_DATASTORE', 'geograph'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD_DATASTORE', 'geograph'),
+        'HOST': os.getenv('POSTGRES_HOST_DATASTORE', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT_DATASTORE', '5432'),
     }
 }
 
