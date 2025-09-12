@@ -18,6 +18,8 @@ class ShapefileImportCreateSchema(Schema):
 class TableInfoSchema(Schema):
     columns: List[List[str]]
     row_count: int
+    geometry_type: Optional[str] = None
+    srid: Optional[int] = None
 
 
 class ImportStatusResponse(Schema):
