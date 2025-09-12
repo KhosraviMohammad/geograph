@@ -1,0 +1,42 @@
+# Custom GeoServer Dockerfile with Importer Plugin
+FROM kartoza/geoserver:latest
+
+# Set environment variables
+ENV GEOSERVER_ADMIN_USER=admin
+ENV GEOSERVER_ADMIN_PASSWORD=geoserver
+ENV GEOSERVER_ADMIN_EMAIL=admin@example.com
+ENV GEOSERVER_DATA_DIR=/opt/geoserver/data_dir
+ENV GEOSERVER_LOG_LEVEL=INFO
+ENV GEOWEBCACHE_CACHE_DIR=/opt/geoserver/gwc
+ENV GEOSERVER_LOG_LOCATION=/opt/geoserver/logs/geoserver.log
+ENV GEOWEBCACHE_LOG_LOCATION=/opt/geoserver/logs/gwc.log
+ENV GEOWEBCACHE_LOG_LEVEL=INFO
+
+# Install curl and unzip
+RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
+
+# Create temp directory and copy zip file
+RUN mkdir -p /tmp/geoserver-extension
+COPY geoserver_extension/geoserver-2.28-SNAPSHOT-importer-plugin.zip /tmp/geoserver-extension/
+
+# Extract zip file
+RUN cd /tmp/geoserver-extension && unzip geoserver-2.28-SNAPSHOT-importer-plugin.zip
+
+# Copy everything from extracted folder to GeoServer lib directory
+RUN cp -r /tmp/geoserver-extension/* /usr/local/tomcat/webapps/geoserver/WEB-INF/lib/
+
+# Set proper permissions
+RUN chmod -R 755 /usr/local/tomcat/webapps/geoserver/WEB-INF/lib/
+
+# Clean up temp directory
+RUN rm -rf /tmp/geoserver-extension
+
+# Expose GeoServer port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/geoserver/ || exit 1
+
+# Start GeoServer
+CMD ["/opt/geoserver/bin/startup.sh"]

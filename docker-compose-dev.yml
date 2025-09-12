@@ -1,6 +1,8 @@
 services:
   geoserver:
-    image: kartoza/geoserver:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.geoserver
     container_name: geoserver
     ports:
       - "8081:8080"
@@ -12,13 +14,8 @@ services:
       - GEOSERVER_LOG_LEVEL=INFO
       - GEOWEBCACHE_CACHE_DIR=/opt/geoserver/gwc
       - GEOSERVER_LOG_LOCATION=/opt/geoserver/logs/geoserver.log
-      - GEOSERVER_LOG_LEVEL=INFO
       - GEOWEBCACHE_LOG_LOCATION=/opt/geoserver/logs/gwc.log
       - GEOWEBCACHE_LOG_LEVEL=INFO
-      - GEOSERVER_LOG_LEVEL=INFO
-      - GEOWEBCACHE_LOG_LEVEL=INFO
-      - GEOSERVER_LOG_LOCATION=/opt/geoserver/logs/geoserver.log
-      - GEOWEBCACHE_LOG_LOCATION=/opt/geoserver/logs/gwc.log
     volumes:
       - geoserver_data:/opt/geoserver/data_dir
       - geoserver_logs:/opt/geoserver/logs
