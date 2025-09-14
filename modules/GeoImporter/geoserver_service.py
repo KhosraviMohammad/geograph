@@ -12,6 +12,7 @@ class GeoServerService:
         self.username = getattr(settings, 'GEOSERVER_USERNAME', 'admin')
         self.password = getattr(settings, 'GEOSERVER_PASSWORD', 'geoserver')
         self.workspace = getattr(settings, 'GEOSERVER_WORKSPACE', 'geograph')
+        self.datastore_name = getattr(settings, 'GEOSERVER_DATASTORE', 'geograph_datastore')
         
     def _get_auth(self):
         """Get authentication tuple for requests"""
@@ -57,6 +58,32 @@ class GeoServerService:
             print(f"Exception creating workspace: {str(e)}")
             return False
     
+    def datastore_exists(self, datastore_name: str = None) -> bool:
+        """Check if a datastore exists in GeoServer"""
+        if not datastore_name:
+            datastore_name = self.datastore_name
+            
+        url = f"{self.base_url}/rest/workspaces/{self.workspace}/datastores/{datastore_name}"
+        
+        try:
+            response = requests.get(
+                url,
+                auth=self._get_auth(),
+                headers=self._get_headers()
+            )
+            
+            if response.status_code == 200:
+                return True
+            elif response.status_code == 404:
+                return False
+            else:
+                print(f"Error checking datastore existence: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"Exception checking datastore existence: {str(e)}")
+            return False
+
     def create_datastore(self, datastore_name: str, table_name: str) -> bool:
         """Create a PostGIS datastore in GeoServer"""
         url = f"{self.base_url}/rest/workspaces/{self.workspace}/datastores"

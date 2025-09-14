@@ -129,10 +129,11 @@ def upload_shapefile_with_geoserver(request, shapefile: UploadedFile = File(...)
         if not geoserver.create_workspace():
             raise HttpError(500, "Failed to create GeoServer workspace")
         
-        # Create datastore
-        datastore_name = f"geograph_datastore_{import_record.id}"
-        if not geoserver.create_datastore(datastore_name, import_record.table_name):
-            raise HttpError(500, "Failed to create GeoServer datastore")
+        # Check if datastore exists, create if not
+        datastore_name = geoserver.datastore_name
+        if not geoserver.datastore_exists(datastore_name):
+            if not geoserver.create_datastore(datastore_name, import_record.table_name):
+                raise HttpError(500, "Failed to create GeoServer datastore")
         
         # Publish layer
         layer_name = f"layer_{import_record.table_name}"
@@ -249,10 +250,11 @@ def publish_to_geoserver(request, import_id: int):
         if not geoserver.create_workspace():
             raise HttpError(500, "Failed to create GeoServer workspace")
         
-        # Create datastore
-        datastore_name = f"geograph_datastore_{import_record.id}"
-        if not geoserver.create_datastore(datastore_name, import_record.table_name):
-            raise HttpError(500, "Failed to create GeoServer datastore")
+        # Check if datastore exists, create if not
+        datastore_name = geoserver.datastore_name
+        if not geoserver.datastore_exists(datastore_name):
+            if not geoserver.create_datastore(datastore_name, import_record.table_name):
+                raise HttpError(500, "Failed to create GeoServer datastore")
         
         # Publish layer
         layer_name = f"layer_{import_record.table_name}"
