@@ -32,6 +32,10 @@ class ImportStatusResponse(Schema):
     status: str
     table_name: str
     created_at: datetime
+    geoserver_layer: Optional[str] = None
+    geoserver_wms_url: Optional[str] = None
+    geoserver_wfs_url: Optional[str] = None
+    published_to_geoserver: bool = False
     table_info: Optional[TableInfoSchema] = None
 
 
@@ -44,8 +48,24 @@ class SuccessResponse(Schema):
     message: str
     import_id: Optional[int] = None
     table_name: Optional[str] = None
+    geoserver_layer: Optional[str] = None
+    wms_url: Optional[str] = None
+    wfs_url: Optional[str] = None
 
 
 class ErrorResponse(Schema):
     success: bool = False
     error: str
+
+
+class GeoServerLayerInfoSchema(Schema):
+    """Schema for GeoServer layer information"""
+    layer_name: str
+    wms_url: str
+    wfs_url: str
+    capabilities_url: str
+    workspace: Optional[str] = None
+    datastore: Optional[str] = None
+    geometry_type: Optional[str] = None
+    srid: Optional[int] = None
+    feature_count: Optional[int] = None

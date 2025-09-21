@@ -14,7 +14,8 @@ from .schemas import (
     ImportStatusResponse,
     ImportListResponse,
     SuccessResponse,
-    ErrorResponse
+    ErrorResponse,
+    GeoServerLayerInfoSchema
 )
 from .geoserver_service import GeoServerService
 from .geoserver_importer_service import GeoServerImporterService
@@ -212,7 +213,11 @@ def list_imports(request):
                 'name': imp.name,
                 'status': imp.status,
                 'table_name': imp.table_name,
-                'created_at': imp.created_at
+                'created_at': imp.created_at,
+                'geoserver_layer': imp.geoserver_layer,
+                'geoserver_wms_url': imp.geoserver_wms_url,
+                'geoserver_wfs_url': imp.geoserver_wfs_url,
+                'published_to_geoserver': imp.published_to_geoserver
             })
         
         return {'imports': imports_data}
@@ -403,7 +408,40 @@ def delete_geoserver_import(request, import_id: int):
         raise HttpError(500, str(e))
 
 
-@api.get("/geoserver-import/layer-info/{layer_name}/", response={200: dict, 404: ErrorResponse, 500: ErrorResponse})
+@api.get("/geoserver-info/{import_id}/", response={200: GeoServerLayerInfoSchema, 404: ErrorResponse, 500: ErrorResponse})
+def get_geoserver_info(request, import_id: int):
+    """Get GeoServer information for a specific import"""
+    try:
+        import_record = get_object_or_404(ShapefileImport, id=import_id)
+        
+        if not import_record.published_to_geoserver or not import_record.geoserver_layer:
+            raise HttpError(404, "Layer not published to GeoServer")
+        
+        # Get additional layer info from GeoServer
+        geoserver = GeoServerService()
+        layer_info = geoserver.get_layer_info(import_record.geoserver_layer)
+        
+        response_data = {
+            'layer_name': import_record.geoserver_layer,
+            'wms_url': import_record.geoserver_wms_url or geoserver.get_wms_url(import_record.geoserver_layer),
+            'wfs_url': import_record.geoserver_wfs_url or geoserver.get_wfs_url(import_record.geoserver_layer),
+            'capabilities_url': geoserver.get_capabilities_url('wms'),
+            'workspace': geoserver.workspace,
+            'datastore': geoserver.datastore_name,
+            'geometry_type': layer_info.get('geometry_type') if layer_info else None,
+            'srid': layer_info.get('srid') if layer_info else None,
+            'feature_count': layer_info.get('feature_count') if layer_info else None
+        }
+        
+        return response_data
+        
+    except HttpError:
+        raise
+    except Exception as e:
+        raise HttpError(500, str(e))
+
+
+@api.get("/geoserver-import/layer-info/{layer_name}/", response={200: GeoServerLayerInfoSchema, 404: ErrorResponse, 500: ErrorResponse})
 def get_geoserver_layer_info(request, layer_name: str):
     """Get information about a layer created by GeoServer Importer"""
     try:
@@ -414,12 +452,20 @@ def get_geoserver_layer_info(request, layer_name: str):
         if not layer_info:
             raise HttpError(404, "Layer not found")
         
-        # Add WMS/WFS URLs
-        layer_info['wms_url'] = importer.get_wms_url(layer_name)
-        layer_info['wfs_url'] = importer.get_wfs_url(layer_name)
-        layer_info['capabilities_url'] = importer.get_capabilities_url('wms')
+        # Prepare response data
+        response_data = {
+            'layer_name': layer_name,
+            'wms_url': importer.get_wms_url(layer_name),
+            'wfs_url': importer.get_wfs_url(layer_name),
+            'capabilities_url': importer.get_capabilities_url('wms'),
+            'workspace': importer.workspace,
+            'datastore': None,  # Could be extracted from layer_info if available
+            'geometry_type': layer_info.get('geometry_type'),
+            'srid': layer_info.get('srid'),
+            'feature_count': layer_info.get('feature_count')
+        }
         
-        return layer_info
+        return response_data
         
     except HttpError:
         raise
