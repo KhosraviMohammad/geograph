@@ -69,3 +69,17 @@ class GeoServerLayerInfoSchema(Schema):
     geometry_type: Optional[str] = None
     srid: Optional[int] = None
     feature_count: Optional[int] = None
+
+
+class GeoServerUserCreateSchema(Schema):
+    """Schema for creating GeoServer user"""
+    username: str
+    password: str
+    enabled: bool = True
+
+
+class GeoServerUserResponseSchema(Schema):
+    """Schema for GeoServer user creation response"""
+    success: bool
+    message: str
+    username: Optional[str] = None

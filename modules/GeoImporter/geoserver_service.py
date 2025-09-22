@@ -217,3 +217,39 @@ class GeoServerService:
     def get_wfs_url(self, layer_name: str) -> str:
         """Get WFS URL for a layer"""
         return f"{self.base_url}/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName={self.workspace}:{layer_name}&maxFeatures=50"
+    
+    def create_user(self, username: str, password: str, enabled: bool = True) -> bool:
+        """Create a new user in GeoServer"""
+        url = f"{self.base_url}/rest/security/usergroup/users"
+        
+        # GeoServer expects XML format
+        xml_data = f"""<user>
+        <userName>{username}</userName>
+        <password>{password}</password>
+        <enabled>{str(enabled).lower()}</enabled>
+</user>"""
+        
+        try:
+            response = requests.post(
+                url,
+                auth=self._get_auth(),
+                headers={
+                    'Content-Type': 'application/xml',
+                    'Accept': 'application/xml'
+                },
+                data=xml_data
+            )
+            
+            print(f"GeoServer Response Status:url {url} {response.status_code}")
+            print(f"GeoServer Response Content: {response.text}")
+            
+            if response.status_code in [200, 201]:
+                print(f"User {username} created successfully in GeoServer")
+                return True
+            else:
+                print(f"Error creating user: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"Exception creating user: {str(e)}")
+            return False

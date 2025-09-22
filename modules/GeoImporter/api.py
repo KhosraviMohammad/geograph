@@ -17,7 +17,9 @@ from .schemas import (
     ImportListResponse,
     SuccessResponse,
     ErrorResponse,
-    GeoServerLayerInfoSchema
+    GeoServerLayerInfoSchema,
+    GeoServerUserCreateSchema,
+    GeoServerUserResponseSchema
 )
 from .geoserver_service import GeoServerService
 from .geoserver_importer_service import GeoServerImporterService
@@ -501,3 +503,34 @@ def proxy_geoserver(request, url: str):
         
     except Exception as e:
         raise HttpError(500, f"Proxy error: {str(e)}")
+
+
+@api.post("/geoserver-user/", response={200: GeoServerUserResponseSchema, 400: ErrorResponse, 500: ErrorResponse})
+def create_geoserver_user(request, user_data: GeoServerUserCreateSchema):
+    """Create a new user in GeoServer"""
+    try:
+        print(f"Creating GeoServer user: {user_data.username}")
+        
+        geoserver = GeoServerService()
+        
+        # Create user in GeoServer
+        success = geoserver.create_user(
+            username=user_data.username,
+            password=user_data.password,
+            enabled=user_data.enabled
+        )
+        
+        if success:
+            return {
+                'success': True,
+                'message': f'User {user_data.username} created successfully in GeoServer',
+                'username': user_data.username
+            }
+        else:
+            raise HttpError(400, f'Failed to create user {user_data.username} in GeoServer. Check GeoServer logs for details.')
+            
+    except HttpError:
+        raise
+    except Exception as e:
+        print(f"Unexpected error creating user: {str(e)}")
+        raise HttpError(500, f"Unexpected error: {str(e)}")
