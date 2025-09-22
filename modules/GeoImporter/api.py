@@ -3,11 +3,13 @@ from ninja.errors import HttpError
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.http import HttpResponse
 import os
 import zipfile
 import tempfile
 import shutil
 import requests
+from urllib.parse import unquote
 from .models import ShapefileImport
 from .schemas import (
     ShapefileImportSchema,
@@ -471,3 +473,31 @@ def get_geoserver_layer_info(request, layer_name: str):
         raise
     except Exception as e:
         raise HttpError(500, str(e))
+
+
+@api.get("/proxy/")
+def proxy_geoserver(request, url: str):
+    """Simple proxy for GeoServer WFS requests"""
+    try:
+        print(f"Proxy request received for URL: {url}")
+        # Decode the URL parameter
+        decoded_url = unquote(url)
+        
+        # Add outputFormat=application/json to WFS URL
+        separator = '&' if '?' in decoded_url else '?'
+        geojson_url = f"{decoded_url}{separator}outputFormat=application/json"
+        
+        print(f"Modified URL for GeoJSON: {geojson_url}")
+        
+        # Make request to GeoServer
+        response = requests.get(geojson_url, timeout=30)
+        
+        # Return the response with proper headers
+        return HttpResponse(
+            response.content,
+            content_type='application/json',
+            status=response.status_code
+        )
+        
+    except Exception as e:
+        raise HttpError(500, f"Proxy error: {str(e)}")
